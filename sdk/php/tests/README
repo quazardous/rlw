@@ -1,0 +1,7 @@
+Rename and adapt config/foo-dist.php
+
+Http tests
+$> phpunit FooTest.php
+
+Tests with local webservice object
+$> FOO_PROXY_MODE=yes phpunit FooTest.php

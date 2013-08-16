@@ -1,0 +1,12 @@
+{
+  "require": {
+  	"pimple/pimple": "*",
+  	"symfony/http-foundation": "*"
+  },
+  "autoload": {
+    "psr-0": {
+      "RLW": "../lib/",
+      "": "src/"
+    }
+  }
+}

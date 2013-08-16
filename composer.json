@@ -1,0 +1,13 @@
+{
+  "name": "quazardous/rlw",
+  "version": "1.0.0",
+  "require": {
+		"pimple/pimple": "*",
+    "symfony/http-foundation": "*"
+  },
+  "autoload": {
+    "psr-0": {
+        "RLW": "lib/"
+    }
+  }
+}
