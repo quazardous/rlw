@@ -202,15 +202,27 @@ class RLW {
   }
   
   public function httpRequest($url, $post = null) {
-    $c = curl_init ($url);
+    $c = curl_init();
+    curl_setopt($c, CURLOPT_URL, $url);
+    
+    if (isset($this->_options['curl_proxy'])) {
+      curl_setopt($c, CURLOPT_PROXY, $this->_options['curl_proxy']);
+      if (isset($this->_options['curl_proxy_userpwd'])) {
+        curl_setopt($c, CURLOPT_PROXYUSERPWD, $this->_options['curl_proxy_userpwd']);
+      }
+      curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);
+      curl_setopt($c, CURLOPT_HEADER, 1);
+    }
+    
     if ($post) {
-      curl_setopt ($c, CURLOPT_POST, true);
+      curl_setopt ($c, CURLOPT_POST, 1);
       curl_setopt ($c, CURLOPT_POSTFIELDS, $post);
     }
-    curl_setopt ($c, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt ($c, CURLOPT_RETURNTRANSFER, 1);
     $ret = curl_exec ($c);
     $http_status = curl_getinfo($c, CURLINFO_HTTP_CODE);
     curl_close ($c);
+    
     return array('data' => $ret, 'status' => $http_status);
   }
   
