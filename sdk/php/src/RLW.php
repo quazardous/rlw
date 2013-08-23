@@ -109,6 +109,10 @@ class RLWRequest extends RLWRequestBase {
     if ($this->getWS()->proxy()) {
       return $this->proxyExecute($this->getWS()->proxy());
     }
+    
+    // get default params
+    $request = array_merge($this->getWS()->getRequest(), $this->_request);
+    
     $url = $this->getWS()->getBaseUrl() . '/' . $this->_url;
     if (count($this->_subRequests)||$post) {
       $post = array('#request' => $this->_request);
@@ -172,7 +176,7 @@ class RLWRequest extends RLWRequestBase {
   }
 }
 
-class RLW {
+class RLW extends RLWRequestBase {
   protected $_options;
   public function __construct($options = array()) {
     if (class_exists('\\RLW\\Webservice\\WebserviceAbstract') && $options instanceof \RLW\Webservice\WebserviceAbstract) {
@@ -198,6 +202,8 @@ class RLW {
   }
   
   public function createRequest($url, $request = null) {
+    // add default args
+    $request = array_merge($this->getRequest(), (array)$request);
     return new RLWRequest($this, $url, $request);
   }
   

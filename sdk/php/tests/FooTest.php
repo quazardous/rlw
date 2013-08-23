@@ -242,4 +242,16 @@ class FooTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(200, $res->sub0->{'#status'}->code);
     $this->assertEquals(200, $res->sub1->{'#status'}->code);
   }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooDefaultsArgs(RLW $ws)
+  {
+    $ws->foo = 'bar';
+    $request = $ws->createRequest('foo');
+    $this->assertTrue($request instanceof RLWRequest);
+    $res = $request->execute();
+    $this->assertEquals('bar', $res->{'#data'}->{'#request'}->foo);
+  }
 }
