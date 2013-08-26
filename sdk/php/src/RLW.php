@@ -217,7 +217,6 @@ class RLW extends RLWRequestBase {
         curl_setopt($c, CURLOPT_PROXYUSERPWD, $this->_options['curl_proxy_userpwd']);
       }
       curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);
-      curl_setopt($c, CURLOPT_HEADER, 1);
     }
     
     if ($post) {
