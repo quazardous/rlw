@@ -223,6 +223,7 @@ class RLW extends RLWRequestBase {
       curl_setopt ($c, CURLOPT_POST, 1);
       curl_setopt ($c, CURLOPT_POSTFIELDS, $post);
     }
+    curl_setopt($c, CURLOPT_ENCODING, ''); // allow gzip/deflate if available
     curl_setopt ($c, CURLOPT_RETURNTRANSFER, 1);
     $ret = curl_exec ($c);
     $http_status = curl_getinfo($c, CURLINFO_HTTP_CODE);
