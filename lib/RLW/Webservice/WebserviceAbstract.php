@@ -1,7 +1,6 @@
 <?php
 namespace RLW\Webservice;
 
-use \Silex\Application;
 use RLW\Tools;
 
 use RequestHandler\RequestHandlerAbstract;
