@@ -98,14 +98,21 @@ class RLWRequest extends RLWRequestBase {
     $this->_subRequests[$tag] = new RLWRequestBase($request);
     return $this->_subRequests[$tag];
   }
-  
+    
   /**
    * Execute the request
    * @param string $post force methode post
    * @throws RLWException
    * @return mixed
    */
-  public function execute($post = false) {
+  public function execute($post = null) {
+    
+    if ($post === null) {
+      if ($this->getWS()->forcePost()) {
+        $post = true;
+      }
+    }
+    
     if ($this->getWS()->proxy()) {
       return $this->proxyExecute($this->getWS()->proxy());
     }
@@ -235,6 +242,16 @@ class RLW extends RLWRequestBase {
   public function proxy() {
     if (isset($this->_options['proxy']) && $this->_options['proxy'] instanceof \RLW\Webservice\WebserviceAbstract) {
       return $this->_options['proxy'];
+    }
+    return false;
+  }
+  
+  public function forcePost($force = null) {
+    if ($force !== null) {
+      $this->_options['force_post'] = $force ? true : false;
+    }
+    if (isset($this->_options['force_post']) && $this->_options['force_post']) {
+      return true;
     }
     return false;
   }
