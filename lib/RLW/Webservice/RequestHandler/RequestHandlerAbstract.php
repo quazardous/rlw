@@ -101,6 +101,18 @@ abstract class RequestHandlerAbstract {
     return null;
   }
   
+  public function __set($name, $value) {
+  	$this->_request['#request'][$name] = $value;
+  }
+  
+  public function __unset($name) {
+  	unset($this->_request['#request'][$name]);
+  }
+  
+  public function __isset($name) {
+  	return isset($this->_request['#request'][$name]);
+  }
+  
   public function getTag() {
     return $this->_request['#tag'];
   }
