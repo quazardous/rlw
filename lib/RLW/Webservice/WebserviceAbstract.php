@@ -210,6 +210,8 @@ abstract class WebserviceAbstract {
         return $this->buildResponse($this->buildStatus(401, 'Unauthorized'));
       }
       
+      $this->init();
+      
       $subRequestResponses = array();
       foreach ($this->requests as $tag => $request) {
         if ($this->canExecuteRequestTag($tag)) {
@@ -288,6 +290,13 @@ abstract class WebserviceAbstract {
    */
   public function canAccess() {
     return true;
+  }
+  
+  /**
+   * Override with init stuff
+   */
+  public function init() {
+
   }
   
   /**
