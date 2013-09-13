@@ -226,6 +226,14 @@ class RLW extends RLWRequestBase {
       curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);
     }
     
+    if (isset($this->_options['curl_connecttimeout'])) {
+    	curl_setopt($c, CURLOPT_CONNECTTIMEOUT , $this->_options['curl_connecttimeout']);
+    }
+    
+    if (isset($this->_options['curl_timeout'])) {
+    	curl_setopt($c, CURLOPT_TIMEOUT, $this->_options['curl_timeout']);
+    }
+    
     if ($post) {
       curl_setopt ($c, CURLOPT_POST, 1);
       curl_setopt ($c, CURLOPT_POSTFIELDS, $post);
