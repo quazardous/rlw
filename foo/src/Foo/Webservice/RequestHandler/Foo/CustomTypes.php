@@ -1,7 +1,13 @@
 <?php
-namespace Foo\Webservice\RequestHandler;
+namespace Foo\Webservice\RequestHandler\Foo;
 
-class RequestHandlerFooDefault extends RequestHandlerFooAbstract {
+class CustomTypes extends BaseAbstract {
+	
+	protected $_requestParameterDefinitions = array(
+			'struct2' => array('type' => '<type2>'),
+			'struct3' => array('type' => '<type3>'),
+	);
+	
   public function execute() {
     $data = (object)array(
         '#name' => $this->_request['#name'],
@@ -13,8 +19,4 @@ class RequestHandlerFooDefault extends RequestHandlerFooAbstract {
     return true;
   }
   
-  public function canAccess() {
-    if ($this->blockme) return false;
-    return true;
-  }
 }

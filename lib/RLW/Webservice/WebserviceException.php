@@ -9,4 +9,9 @@ class WebserviceException extends \Exception {
   const request_inconsistency = 5;
   const validation_errors = 6;
   const logic_inconsistency = 7;
+  const unknown_request_parameter_type = 8;
+  const no_nested_type = 9;
+  const no_tags = 10;
+  const no_struct = 11;
+  const unknown_request_parameter_custom_type = 12;
 }

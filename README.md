@@ -28,7 +28,7 @@ Webservice class
 
 The core is the Foo\Webservice\WebserviceFoo class. It provides the (sub)request/class map.
 
-    protected $requestHandlersClassMap = array(
+    protected $_requestHandlersClassMap = array(
       'foo/#main' => "RequestHandler\\RequestHandlerFooDefault",
       'foo/bar'   => "RequestHandler\\RequestHandlerFooDefault",
       'foo/foo'   => "RequestHandler\\RequestHandlerFooDefault",

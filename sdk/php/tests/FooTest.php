@@ -254,4 +254,613 @@ class FooTest extends PHPUnit_Framework_TestCase {
     $res = $request->execute();
     $this->assertEquals('bar', $res->{'#data'}->{'#request'}->foo);
   }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceAlterRequest(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$bar = $request->subRequest('bar');
+  	$bar->foo = 'one';
+  	$alter = $request->subRequest('alter');
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->bar->{'#status'}->code);
+  	$this->assertEquals('two', $res->bar->{'#data'}->{'#request'}->foo);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMandatory(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('mandatoryString : parameter is mandatory', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMandatoryNull(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = null;
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('mandatoryString : parameter is mandatory', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMandatoryEmptyString(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = '';
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('mandatoryString : parameter is mandatory', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMandatoryZero(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = 0;
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('mandatoryString : not a string', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMandatoryOk(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz", $res->types->{'#data'}->{'#request'}->mandatoryString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStringLenMin(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->sizeString = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('sizeString : minimum length is 5', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStringLenMax(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->sizeString = "xyz0123456789";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('sizeString : maximum length is 10', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStringLenOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->sizeString = "xyz0123";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz0123", $res->types->{'#data'}->{'#request'}->sizeString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesFreeString(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeString = "xyz0123";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz0123", $res->types->{'#data'}->{'#request'}->freeString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPatternStringKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->patternString = "!xyz0123";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('patternString : must match pattern /^xyz/', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPatternStringOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->patternString = "xyz0123";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz0123", $res->types->{'#data'}->{'#request'}->patternString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPositiveNumericBadType(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->positiveNumeric = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('positiveNumeric : not a numeric', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPositiveNumericKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->positiveNumeric = -1;
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('positiveNumeric : minimum value is 0', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPositiveNumericOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->positiveNumeric = 0;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(0, $res->types->{'#data'}->{'#request'}->positiveNumeric);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesPositiveNumericOKFloat(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->positiveNumeric = 0.1;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(0.1, $res->types->{'#data'}->{'#request'}->positiveNumeric);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesdefaultString(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz", $res->types->{'#data'}->{'#request'}->defaultString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesTagKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeTag = 'KO';
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeTag : KO not in the list', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesTagOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeTag = 'two';
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals('two', $res->types->{'#data'}->{'#request'}->freeTag);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBooleanKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeBoolean : not a boolean', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBooleanTrue(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = true;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(true, $res->types->{'#data'}->{'#request'}->freeBoolean);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBooleanFalse(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = false;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(false, $res->types->{'#data'}->{'#request'}->freeBoolean);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBoolean1(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = 1;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(1, $res->types->{'#data'}->{'#request'}->freeBoolean);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBoolean0(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = 0;
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(0, $res->types->{'#data'}->{'#request'}->freeBoolean);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesBooleanKO2(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeBoolean = 2;
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeBoolean : not a boolean', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   * @expectedException RLWException
+   * @expectedExceptionCode 1001
+   * @expectedExceptionMessage API RLW\Webservice\WebserviceException : struct requires a struct definition (11)
+   */
+  public function testApiFooWebserviceTypesStructNoStruct(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('bad/structs');
+  	$types->freeStruct = (object)array();
+  	$res = $request->execute();
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStructBadValue(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->freeStruct = (object)array();
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->structs->{'#status'}->code);
+  	$this->assertEquals('freeStruct.a : parameter is mandatory', $res->structs->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStructBadValue2(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->freeStruct = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->structs->{'#status'}->code);
+  	$this->assertEquals('freeStruct : parameter is not a struct', $res->structs->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStructBadStructValue(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->freeStruct = (object)array('a' => 1);
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->structs->{'#status'}->code);
+  	$this->assertEquals('freeStruct.a : not a string', $res->structs->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStructOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->freeStruct = (object)array('a' => "xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->structs->{'#status'}->code);
+  	$this->assertEquals((object)array('a' => "xyz"), $res->structs->{'#data'}->{'#request'}->freeStruct);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesStructKOUnknown(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->freeStruct = (object)array('a' => "xyz", 'c' => 1);
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->structs->{'#status'}->code);
+  	$this->assertEquals('freeStruct.c : unknown parameter', $res->structs->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesKOUnknown(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('structs');
+  	$types->unknown = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->structs->{'#status'}->code);
+  	$this->assertEquals('unknown : unknown parameter', $res->structs->{'#status'}->message);
+  }
+
+  /**
+   * @depends testNewRLW
+   * @expectedException RLWException
+   * @expectedExceptionCode 1001
+   * @expectedExceptionMessage API RLW\Webservice\WebserviceException : array requires a nested type (9)
+   */
+  public function testApiFooWebserviceArraysNoNested(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('bad/arrays');
+  	$arrays->freeStringsArray = "bad";
+  	$res = $request->execute();
+  }  
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceArraysBad(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->freeStringsArray = "bad";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->arrays->{'#status'}->code);
+  	$this->assertEquals('freeStringsArray : not an array', $res->arrays->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceArraysBadItems(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->freeStringsArray = array("xyz", "xyz", 1);
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->arrays->{'#status'}->code);
+  	$this->assertEquals('freeStringsArray[2] : not a string', $res->arrays->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceArraysOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->freeStringsArray = array("xyz", "xyz", "xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->arrays->{'#status'}->code);
+  	$this->assertEquals(array("xyz", "xyz", "xyz"), $res->arrays->{'#data'}->{'#request'}->freeStringsArray);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceArraysSizeMin(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->sizeStringsArray = array("xyz", "xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->arrays->{'#status'}->code);
+  	$this->assertEquals('sizeStringsArray : minimum length is 3', $res->arrays->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceArraysSizeMax(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->sizeStringsArray = array("xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz", "xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->arrays->{'#status'}->code);
+  	$this->assertEquals('sizeStringsArray : maximum length is 10', $res->arrays->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   * @expectedException RLWException
+   * @expectedExceptionCode 1001
+   * @expectedExceptionMessage API RLW\Webservice\WebserviceException : type1 : unknown custom type (12)
+   */
+  public function testApiFooWebserviceCustomTypeUndefinedType(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$custom = $request->subRequest('bad/custom/types');
+  	$custom->struct1 = array("foo" => "xyz");
+  	$res = $request->execute();
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceCustomTypeKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$custom = $request->subRequest('custom/types');
+  	$custom->struct2 = array("foo" => "xyz", "bad" => 1);
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->{'custom/types'}->{'#status'}->code);
+  	$this->assertEquals('struct2.bad : unknown parameter', $res->{'custom/types'}->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceCustomTypeOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$custom = $request->subRequest('custom/types');
+  	$custom->struct2 = array("foo" => "xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->{'custom/types'}->{'#status'}->code);
+  	$this->assertEquals((object)array("foo" => "xyz"), $res->{'custom/types'}->{'#data'}->{'#request'}->struct2);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceCustomTypePrepare(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$custom = $request->subRequest('custom/types');
+  	$custom->struct3 = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->{'custom/types'}->{'#status'}->code);
+  	$this->assertEquals((object)array("foo" => "xyz"), $res->{'custom/types'}->{'#data'}->{'#request'}->struct3);
+  }
 }

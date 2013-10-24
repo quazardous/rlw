@@ -5,17 +5,45 @@ use RLW\Webservice\WebserviceAbstract;
 
 class WebserviceFoo extends WebserviceAbstract {
 
-  protected $requestHandlersClassMap = array(
-      'foo/#main' => "RequestHandler\\RequestHandlerFooDefault",
-      'foo/bar'   => "RequestHandler\\RequestHandlerFooDefault",
-      'foo/foo'   => "RequestHandler\\RequestHandlerFooDefault",
-      'foo/boo'   => "RequestHandler\\RequestHandlerFooDefault",
-      'foo/far'   => "RequestHandler\\RequestHandlerFooDefault",
+  protected $_requestHandlersClassMap = array(
+      'foo/#main' => "RequestHandler\\Foo\\Base",
+      'foo/bar'   => "RequestHandler\\Foo\\Base",
+      'foo/foo'   => "RequestHandler\\Foo\\Base",
+      'foo/boo'   => "RequestHandler\\Foo\\Base",
+      'foo/far'   => "RequestHandler\\Foo\\Base",
+  		'foo/alter' => "RequestHandler\\Foo\\Alter",
+  		'foo/types' => "RequestHandler\\Foo\\Types",
+  		'foo/bad/custom/types' => "RequestHandler\\Foo\\BadCustomTypes",
+  		'foo/custom/types' => "RequestHandler\\Foo\\CustomTypes",
+  		'foo/arrays' => "RequestHandler\\Foo\\Arrays",
+  		'foo/bad/arrays' => "RequestHandler\\Foo\\BadArrays",
+  		'foo/structs' => "RequestHandler\\Foo\\Structs",
+  		'foo/bad/structs' => "RequestHandler\\Foo\\BadStructs",
   );
   
+  protected $_typeDefinitions = array(
+  	'type2' => array(
+  		'type' => 'struct',
+  		'struct' => array(
+  			'foo' => array('type' => 'string'),
+  		),
+  	),
+  	'type3' => array(
+  			'type' => 'struct',
+  			'struct' => array(
+  					'foo' => array('type' => 'string'),
+  			),
+  	),
+  );
+  
+  public function prepareCustomStructTypeDataType3(&$value) {
+  	if (!is_array($value)) {
+  		$value = array('foo' => $value);
+  	}
+  }
+  
   public function canAccess() {
-    if (isset($this->requests['#main']['#request']['blockme'])
-        && $this->requests['#main']['#request']['blockme']) return false;
+    if ($this->getRequestHandler('#main')->blockme) return false;
     return true;
   }
 }

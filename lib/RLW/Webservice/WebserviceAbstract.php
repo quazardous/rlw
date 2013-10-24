@@ -6,19 +6,49 @@ use RLW\Tools;
 use RequestHandler\RequestHandlerAbstract;
 
 abstract class WebserviceAbstract {
-  
+	
   /**
    * Associative array of api/(sub)request name to request handler class.
    * api/#main stands for the main request.
    * @var array
    */
-  protected $requestHandlerClassMap = array();
+  protected $_requestHandlerClassMap = array();
+  
+  /**
+   * Shared types definitions.
+   * @see RLW\Webservice\RequestHandler\RequestHandlerAbstract
+   * @var array
+   */
+  protected $_typeDefinitions = array();
+  
+  public function getTypeDefinition($type) {
+  	if (isset($this->_typeDefinitions[$type])) {
+  		if (isset($this->_typeDefinitions[$type]['type']) && $this->_typeDefinitions[$type]['type'] == 'struct' && !isset($this->_typeDefinitions[$type]['prepare_callback'])) {
+  			$this->_typeDefinitions[$type]['prepare_callback'] = 'prepareCustomStructTypeData'.ucfirst($type);
+  		}
+  		return $this->_typeDefinitions[$type];
+  	}
+  	return null;
+  }
+  
+  /**
+   * Allow handlers to alter/prepare the struct.
+   * @param unknown $data
+   * @param unknown $definition
+   * @param unknown $path
+   */
+  public function prepareRequestParameterStruct(&$data, $definition, $path) {
+  	if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
+  		$f = $definition['prepare_callback'];
+  		$this->$f($data, $definition, $path);
+  	}
+  }
   
   /**
    * Associative array tag => Request Handler Object
    * @var array
    */
-  protected $requestHandler = array();
+  protected $_requestHandlers = array();
   
   protected function buildException(\Exception $e) {
     if (defined('DEBUG') && DEBUG) {
@@ -79,14 +109,12 @@ abstract class WebserviceAbstract {
       }
     }
     unset($request);
-
     
-    
-    // give the possibility to the handlers to alter the request
+    // initialize request handlers and give the possibility to the handlers to alter the request 
     $list = $allRequests;
     $this->alterRequests($allRequests);
     foreach ($list as $request) {
-      $this->getRequestHandler($request)->alterRequests($allRequests);
+      $this->initRequestHandler($request['#tag'], $request['#name'])->alterRequests($allRequests);
     }
     unset($request);
 
@@ -117,6 +145,8 @@ abstract class WebserviceAbstract {
     $res = array();
     foreach ($ordered as $tag) {
       $res[$tag] = $allRequests[$tag];
+      // set definitive data
+      $this->getRequestHandler($tag)->setRequest($allRequests[$tag]);
     }
     
     return $res;
@@ -126,15 +156,15 @@ abstract class WebserviceAbstract {
    * Current api and request
    * @var string
    */
-  protected $api;
-  protected $requests = array();
+  protected $_api;
+  protected $_requests = array();
   
   public function getRequests() {
-    return $this->requests;
+    return $this->_requests;
   }
   
   public function isRequest($name) {
-    foreach ($this->requests as $request) {
+    foreach ($this->_requests as $request) {
       if ($request['#name'] == $name) return true;
     }
     return false;
@@ -148,63 +178,54 @@ abstract class WebserviceAbstract {
   }
   
   /**
-   * Get request handler from request struct or tag
-   * @param array|string $tag
+   * Init base request handler object.
+   * @param string $tag
+   * @param string $name
+   * @throws WebserviceException
+   * @return \RLW\Webservice\RequestHandler\RequestHandlerAbstract
+   */
+  protected function initRequestHandler($tag, $name) {
+  	$id = $this->_api . '/' . $name;
+  	if (!isset($this->_requestHandlersClassMap[$id])) {
+  		throw new WebserviceException("{$name} : unknown (sub)request name", WebserviceException::unknown_subrequest_name);
+  	}
+  	$class = $this->_requestHandlersClassMap[$id];
+  	if ($class{0} != '\\') $class = $this->getCurrentNamespace() . '\\' . $class;
+  	$class = trim($class, '\\');
+  	$this->_requestHandlers[$tag] = new $class($this);
+  	return $this->_requestHandlers[$tag];
+  }
+  
+  /**
+   * Get request handler from request tag
+   * @param string $tag
    * @throws WebserviceException
    * @return \RLW\Webservice\RequestHandler\RequestHandlerAbstract
    */
   public function getRequestHandler($tag) {
-    if (is_array($tag)) {
-      $orireq = $request = $tag;
-      $tag = $request['#tag'];
+    if (!isset($this->_requestHandlers[$tag])) {
+      throw new WebserviceException("{$tag} : cannot find (sub)request", WebserviceException::logic_inconsistency);
     }
-    else {
-      if (isset($this->requests[$tag])) {
-        $request = $this->requests[$tag];
-      }
-      else {
-        $request = false;
-      }
-    }
-    $id = false;
-    if ($request) {
-      $name = $request['#name'];
-      $id = $this->api . '/' . $name;
-    }
-    
-    if (!isset($this->requestHandlers[$tag])) {
-      if (!$id) {
-        throw new WebserviceException("{$tag} : cannot determine (sub)request name", WebserviceException::logic_inconsistency);
-      }
-      if (!isset($this->requestHandlersClassMap[$id])) {
-        throw new WebserviceException("{$name} : unknown (sub)request name", WebserviceException::unknown_subrequest_name);
-      }
-      $class = $this->requestHandlersClassMap[$id];
-      if ($class{0} != '\\') $class = $this->getCurrentNamespace() . '\\' . $class;
-      $class = trim($class, '\\');
-      $this->requestHandlers[$tag] = new $class($this);
-    }
-    if (isset($orireq)) $this->requestHandlers[$tag]->setRequest($orireq);
-    return $this->requestHandlers[$tag];
+    return $this->_requestHandlers[$tag];
   }
   
   /**
    * Keep track of successfull (or not) requests
    * @var array
    */
-  protected $requestsSuccess = array();
+  protected $_requestsSuccess = array();
   
   protected function canExecuteRequestTag($tag) {
-    foreach ($this->requests[$tag]['#requires'] as $reqtag) {
-      if (!$this->requestsSuccess[$reqtag]) return false;
+    foreach ($this->_requests[$tag]['#requires'] as $reqtag) {
+      if (!$this->_requestsSuccess[$reqtag]) return false;
     }
     return true;
   }
   
-  public function api($api, $request, $returnException = true) {
+  public function api($api, $apiRequest, $returnException = true) {
     try {
-      $this->api = ltrim($api, '/');
-      $this->requests = $this->preprareRequests($request);
+      $this->_api = ltrim($api, '/');
+      $this->_requests = $this->preprareRequests($apiRequest);
       
       if (!$this->canAccess()) {
         return $this->buildResponse($this->buildStatus(401, 'Unauthorized'));
@@ -213,37 +234,38 @@ abstract class WebserviceAbstract {
       $this->init();
       
       $subRequestResponses = array();
-      foreach ($this->requests as $tag => $request) {
-        if ($this->canExecuteRequestTag($tag)) {
-          $handler = $this->getRequestHandler($request);
-          if ($handler->canAccess()) {
-            if ($handler->isValid()) {
-              $this->requestsSuccess[$tag] = $handler->execute();
-              
-              if (!$this->requestsSuccess[$tag]) {
-                $subRequestResponses[$tag] = $this->buildResponse($handler->getStatus());
-              }
-            }
-            else {
-              $this->requestsSuccess[$tag] = false;
-              $subRequestResponses[$tag] = $this->buildResponse($handler->getStatus());
-            }
-          }
-          else {
-            $this->requestsSuccess[$tag] = false;
-            $subRequestResponses[$tag] = $this->buildResponse($this->buildStatus(401, 'Unauthorized'));
-          }
+      foreach ($this->_requests as $tag => $dummy) {
+      	$this->_requestsSuccess[$tag] = false;
+      	$handler = $this->getRequestHandler($tag);
+      	    	
+        if (!$this->canExecuteRequestTag($tag)) {
+        	$status = $this->buildStatus(406, 'Required (sub) requests not satisfied');
+        }
+        elseif (!$handler->canAccess()) {
+        	$status = $this->buildStatus(401, 'Unauthorized');
+        }
+        elseif (!$handler->areParametersValid()) {
+        	$status = $handler->getStatus();
+        }
+        elseif (!$handler->isValid()) {
+        	$status = $handler->getStatus();
+        }
+        elseif (!$handler->execute()) {
+        	$status = $handler->getStatus();
         }
         else {
-          $this->requestsSuccess[$tag] = false;
-          $subRequestResponses[$tag] = $this->buildResponse($this->buildStatus(406, 'Required (sub) requests not satisfied'));
+        	$this->_requestsSuccess[$tag] = true;
+        }
+
+        if(!$this->_requestsSuccess[$tag]) {
+        	$subRequestResponses[$tag] = $this->buildResponse($status);
         }
       }
       
       // postpone successfull response building
-      foreach ($this->requests as $tag => $request) {
-        if ($this->requestsSuccess[$tag]) {
-          $handler = $this->getRequestHandler($request);
+      foreach ($this->_requests as $tag => $dummy) {
+        if ($this->_requestsSuccess[$tag]) {
+          $handler = $this->getRequestHandler($tag);
           $handler->finalize();
           $subRequestResponses[$tag] = $this->buildResponse($handler->getStatus(), $handler->getResponseData());
         }
