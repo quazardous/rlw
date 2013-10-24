@@ -22,7 +22,7 @@ abstract class RequestHandlerAbstract {
    * Description of the request params.
    * @var array(
    *   'param1' => array(
-   *      'type' => numeric|string|boolean|array|struct|tag|<type>, // default is string
+   *      'type' => numeric|string|boolean|array|struct|tag|<type>|null, // default is string, you can use null to disable a shared parameter
    *      'struct' => array of fields|params definitions for struct, // struct can be nested in an array
    *      'mandatory' => true|false, // default is false
    *      'default' => value, // default value, default is to not set the value at all
@@ -167,7 +167,7 @@ abstract class RequestHandlerAbstract {
   	}
   	
   	foreach ($data as $name => &$value) {
-  		if (!isset($definitions[$name])) {
+  		if ((!isset($definitions[$name]))||($definitions[$name]['type'] == 'null')) {
   			$this->setStatus(400, "{$path}{$name} : unknown parameter");
   			return false;
   		}
@@ -215,6 +215,7 @@ abstract class RequestHandlerAbstract {
   
   public function __construct(WebserviceAbstract $ws) {
     $this->_ws = $ws;
+    $this->_requestParameterDefinitions += $this->getWS()->getSharedRequestParameterDefinitions();
     $this->initParameterDefinitions($this->_requestParameterDefinitions);
   }
   

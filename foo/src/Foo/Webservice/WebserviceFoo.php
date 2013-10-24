@@ -19,6 +19,7 @@ class WebserviceFoo extends WebserviceAbstract {
   		'foo/bad/arrays' => "RequestHandler\\Foo\\BadArrays",
   		'foo/structs' => "RequestHandler\\Foo\\Structs",
   		'foo/bad/structs' => "RequestHandler\\Foo\\BadStructs",
+  		'foo/shared' => "RequestHandler\\Foo\\Shared",
   );
   
   protected $_typeDefinitions = array(
@@ -34,6 +35,11 @@ class WebserviceFoo extends WebserviceAbstract {
   					'foo' => array('type' => 'string'),
   			),
   	),
+  );
+  
+  protected $_sharedRequestParameterDefinitions = array(
+  	'shared1' => 'string',
+  	'shared2' => 'string',
   );
   
   public function prepareCustomStructTypeDataType3(&$value) {

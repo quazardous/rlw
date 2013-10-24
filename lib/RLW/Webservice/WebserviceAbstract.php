@@ -21,6 +21,13 @@ abstract class WebserviceAbstract {
    */
   protected $_typeDefinitions = array();
   
+  /**
+   * Shared request parameter sefinitions
+   * @see RLW\Webservice\RequestHandler\RequestHandlerAbstract::$_requestParameterDefinitions
+   * @var array
+   */
+  protected $_sharedRequestParameterDefinitions = array();
+  
   public function getTypeDefinition($type) {
   	if (isset($this->_typeDefinitions[$type])) {
   		if (isset($this->_typeDefinitions[$type]['type']) && $this->_typeDefinitions[$type]['type'] == 'struct' && !isset($this->_typeDefinitions[$type]['prepare_callback'])) {
@@ -29,6 +36,10 @@ abstract class WebserviceAbstract {
   		return $this->_typeDefinitions[$type];
   	}
   	return null;
+  }
+  
+  public function getSharedRequestParameterDefinitions() {
+  	return $this->_sharedRequestParameterDefinitions;
   }
   
   /**

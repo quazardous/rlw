@@ -342,6 +342,48 @@ class FooTest extends PHPUnit_Framework_TestCase {
   /**
    * @depends testNewRLW
    */
+  public function testApiFooWebserviceTypesNull(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->null = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('null : unknown parameter', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceSharedOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('shared');
+  	$types->shared1 = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->shared->{'#status'}->code);
+  	$this->assertEquals("xyz", $res->shared->{'#data'}->{'#request'}->shared1);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceSharedDisabled(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('shared');
+  	$types->shared2 = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->shared->{'#status'}->code);
+  	$this->assertEquals('shared2 : unknown parameter', $res->shared->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
   public function testApiFooWebserviceTypesStringLenMin(RLW $ws)
   {
   	$request = $ws->createRequest('foo');

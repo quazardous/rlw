@@ -13,6 +13,7 @@ class Types extends BaseAbstract {
 			'defaultString' => array('type' => 'string', 'default' => 'xyz'),
 			'freeTag' => array('type' => 'tag', 'tags' => array('one', 'two', 'three')),
 			'freeBoolean' => array('type' => 'boolean'),
+			'null' => 'null', // null parameter
 	);
 	
   public function execute() {
