@@ -33,6 +33,9 @@ abstract class WebserviceAbstract {
   		if (isset($this->_typeDefinitions[$type]['type']) && !isset($this->_typeDefinitions[$type]['prepare_callback'])) {
   			$this->_typeDefinitions[$type]['prepare_callback'] = 'prepareCustomTypeData'.ucfirst($type);
   		}
+  		if (isset($this->_typeDefinitions[$type]['type']) && !isset($this->_typeDefinitions[$type]['valid_callback'])) {
+  			$this->_typeDefinitions[$type]['valid_callback'] = 'validCustomTypeData'.ucfirst($type);
+  		}
   		return $this->_typeDefinitions[$type];
   	}
   	return null;
