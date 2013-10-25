@@ -220,10 +220,10 @@ abstract class RequestHandlerAbstract {
 	protected function prepareRequestParameterValue(&$data, $definition, $path) {
 		if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
 			$f = $definition['prepare_callback'];
-			$this->$f($data, $definition, $path);
+			$this->$f($data, $definition, $path, $this);
 		}
 		else {
-			$this->getWS()->prepareRequestParameterValue($data, $definition, $path);
+			$this->getWS()->prepareRequestParameterValue($data, $definition, $path, $this);
 		}
 	}
 	
@@ -238,9 +238,9 @@ abstract class RequestHandlerAbstract {
 	protected function validRequestParameterValue($data, $definition, $path) {
 		if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
 			$f = $definition['valid_callback'];
-			return $this->$f($data, $definition, $path);
+			return $this->$f($data, $definition, $path, $this);
 		}
-		return $this->getWS()->validRequestParameterValue($data, $definition, $path);
+		return $this->getWS()->validRequestParameterValue($data, $definition, $path, $this);
 	}
   
   protected $_request;

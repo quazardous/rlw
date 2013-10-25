@@ -3,7 +3,7 @@ namespace RLW\Webservice;
 
 use RLW\Tools;
 
-use RequestHandler\RequestHandlerAbstract;
+use RLW\Webservice\RequestHandler\RequestHandlerAbstract;
 
 abstract class WebserviceAbstract {
 	
@@ -51,10 +51,10 @@ abstract class WebserviceAbstract {
    * @param unknown $definition
    * @param unknown $path
    */
-  public function prepareRequestParameterValue(&$data, $definition, $path) {
+  public function prepareRequestParameterValue(&$data, $definition, $path, RequestHandlerAbstract $request) {
   	if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
   		$f = $definition['prepare_callback'];
-  		$this->$f($data, $definition, $path);
+  		$this->$f($data, $definition, $path, $request);
   	}
   }
   
@@ -66,10 +66,10 @@ abstract class WebserviceAbstract {
    *
    * @return boolean
    */
-  public function validRequestParameterValue($data, $definition, $path) {
+  public function validRequestParameterValue($data, $definition, $path, RequestHandlerAbstract $request) {
   	if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
   		$f = $definition['valid_callback'];
-  		return $this->$f($data, $definition, $path);
+  		return $this->$f($data, $definition, $path, $request);
   	}
   	return true;
   }  
