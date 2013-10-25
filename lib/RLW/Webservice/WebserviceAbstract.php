@@ -56,6 +56,22 @@ abstract class WebserviceAbstract {
   }
   
   /**
+   * Allow handlers to valid the parameter value.
+   * @param unknown $data
+   * @param unknown $definition
+   * @param unknown $path
+   *
+   * @return boolean
+   */
+  public function validRequestParameterValue($data, $definition, $path) {
+  	if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
+  		$f = $definition['valid_callback'];
+  		return $this->$f($data, $definition, $path);
+  	}
+  	return true;
+  }  
+  
+  /**
    * Associative array tag => Request Handler Object
    * @var array
    */

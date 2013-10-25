@@ -13,8 +13,13 @@ class Types extends BaseAbstract {
 			'defaultString' => array('type' => 'string', 'default' => 'xyz'),
 			'freeTag' => array('type' => 'tag', 'tags' => array('one', 'two', 'three')),
 			'freeBoolean' => array('type' => 'boolean'),
+			'freeMixed' => array('type' => 'mixed', 'valid_callback' => 'validFreeMixed'),
 			'null' => 'null', // null parameter
 	);
+	
+	protected function validFreeMixed($value) {
+		return ($value === "xyz" || $value === array("xyz"));
+	}
 	
   public function execute() {
     $data = (object)array(

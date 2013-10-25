@@ -667,6 +667,50 @@ class FooTest extends PHPUnit_Framework_TestCase {
   
   /**
    * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMixedKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->freeMixed = 1;
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeMixed : parameter is not valid', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMixedOK1(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeMixed = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz", $res->types->{'#data'}->{'#request'}->freeMixed);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesMixedOK2(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeMixed = array("xyz");
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals(array("xyz"), $res->types->{'#data'}->{'#request'}->freeMixed);
+  }
+  
+  /**
+   * @depends testNewRLW
    * @expectedException RLWException
    * @expectedExceptionCode 1001
    * @expectedExceptionMessage API RLW\Webservice\WebserviceException : struct requires a struct definition (11)

@@ -22,7 +22,10 @@ abstract class RequestHandlerAbstract {
    * Description of the request params.
    * @var array(
    *   'param1' => array(
-   *      'type' => numeric|string|boolean|array|struct|tag|<type>|null, // default is string, you can use null to disable a shared parameter
+   *      'type' => numeric|string|boolean|array|struct|tag|<type>|null|mixed,
+   *      // default is string,
+   *      // you can use null to disable a shared parameter
+   *      // mixed means what you wants
    *      'struct' => array of fields|params definitions for struct, // struct can be nested in an array
    *      'mandatory' => true|false, // default is false
    *      'default' => value, // default value, default is to not set the value at all
@@ -32,6 +35,7 @@ abstract class RequestHandlerAbstract {
    *      'max' => max, // max size for numeric, array and string
    *      'tags' => array(tags), // list of tags for tag type
    *      'prepare_callback' => 'method_name', // a prepare callback
+   *      'valid_callback' => 'method_name', // a valid callback
    *   ),
    *   'param2' => 'type', 
    *   ...
@@ -73,7 +77,7 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : must match pattern {$definition['pattern']}");
   				return false;
   			}
-  			return true;
+  			break;
 
   		case 'numeric':
   			if (!is_numeric($value)) {
@@ -88,7 +92,7 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : maximum value is {$definition['max']}");
   				return false;
   			}
-  			return true;
+  			break;
   			
   		case 'boolean':
   			if ($value === true) $value = 1;
@@ -97,7 +101,7 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : not a boolean");
   				return false;
   			}
-  			return true;
+  			break;
   			
   		case 'array':
   			if (empty($definition['nested'])) {
@@ -120,7 +124,7 @@ abstract class RequestHandlerAbstract {
   					return false;
   				}
   			}
-  			return true;
+  			break;
   			
   		case 'tag':
   			if (empty($definition['tags']) || (!is_array($definition['tags']))) {
@@ -130,16 +134,29 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : ".((string)$value)." not in the list");
   				return false;
   			}
-  			return true;
+  			break;
   			
   		case 'struct':
   			if (empty($definition['struct']) || (!is_array($definition['struct']))) {
   				throw new WebserviceException("struct requires a struct definition", WebserviceException::no_struct);
   			}
-  			return $this->validRequestParameterStruct($value, $definition['struct'], $path);
+  			if(!$this->validRequestParameterStruct($value, $definition['struct'], $path)) {
+  				return false;
+  			}
+  			break;
+  			
+  		case 'mixed':
+  			break;
   			
   		default:
   			throw new WebserviceException("{$type} : unknown type", WebserviceException::unknown_request_parameter_type);
+  	}
+  	if (!$this->validRequestParameterValue($value, $definition, $path)) {
+  		if ($this->getStatusCode() == 200) {
+  			// default status for invalid parameter
+  			$this->setStatus(400, "{$path} : parameter is not valid");
+  		}
+  		return false;
   	}
   	return true;
   }
@@ -208,6 +225,22 @@ abstract class RequestHandlerAbstract {
 		else {
 			$this->getWS()->prepareRequestParameterValue($data, $definition, $path);
 		}
+	}
+	
+	/**
+	 * Allow handlers to valid the parameter value.
+	 * @param unknown $data
+	 * @param unknown $definition
+	 * @param unknown $path
+   * 
+   * @return boolean
+   */
+	protected function validRequestParameterValue($data, $definition, $path) {
+		if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
+			$f = $definition['valid_callback'];
+			return $this->$f($data, $definition, $path);
+		}
+		return $this->getWS()->validRequestParameterValue($data, $definition, $path);
 	}
   
   protected $_request;
@@ -287,6 +320,10 @@ abstract class RequestHandlerAbstract {
   protected $_statusDetails;
   protected $_responseData;
 
+  public function getStatusCode() {
+  	return $this->_statusCode;
+  }
+  
   public function getStatus() {
     return $this->getWS()->buildStatus(
       $this->_statusCode,
