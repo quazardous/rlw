@@ -31,6 +31,7 @@ abstract class RequestHandlerAbstract {
    *      'min' => min, // min size for numeric, array and string
    *      'max' => max, // max size for numeric, array and string
    *      'tags' => array(tags), // list of tags for tag type
+   *      'prepare_callback' => 'method_name', // a prepare callback
    *   ),
    *   'param2' => 'type', 
    *   ...
@@ -52,6 +53,7 @@ abstract class RequestHandlerAbstract {
    * @return boolean
    */
   protected function validRequestParameter(&$value, $definition , $path) {
+  	$this->prepareRequestParameterValue($value, $definition, $path);
   	$type = $definition['type'];
   	switch ($type) {
   		case 'string':
@@ -134,7 +136,6 @@ abstract class RequestHandlerAbstract {
   			if (empty($definition['struct']) || (!is_array($definition['struct']))) {
   				throw new WebserviceException("struct requires a struct definition", WebserviceException::no_struct);
   			}
-  			$this->prepareRequestParameterStruct($value, $definition, $path);
   			return $this->validRequestParameterStruct($value, $definition['struct'], $path);
   			
   		default:
@@ -194,13 +195,19 @@ abstract class RequestHandlerAbstract {
   }
   
   /**
-   * Allow handlers to alter/prepare the struct.
+   * Allow handlers to alter/prepare the parameter value.
    * @param unknown $data
    * @param unknown $definition
    * @param unknown $path
    */
-	protected function prepareRequestParameterStruct(&$data, $definition, $path) {
-		$this->getWS()->prepareRequestParameterStruct($data, $definition, $path);
+	protected function prepareRequestParameterValue(&$data, $definition, $path) {
+		if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
+			$f = $definition['prepare_callback'];
+			$this->$f($data, $definition, $path);
+		}
+		else {
+			$this->getWS()->prepareRequestParameterValue($data, $definition, $path);
+		}
 	}
   
   protected $_request;

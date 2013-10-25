@@ -43,12 +43,12 @@ abstract class WebserviceAbstract {
   }
   
   /**
-   * Allow handlers to alter/prepare the struct.
+   * Allow handlers to alter/prepare the parameter value.
    * @param unknown $data
    * @param unknown $definition
    * @param unknown $path
    */
-  public function prepareRequestParameterStruct(&$data, $definition, $path) {
+  public function prepareRequestParameterValue(&$data, $definition, $path) {
   	if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
   		$f = $definition['prepare_callback'];
   		$this->$f($data, $definition, $path);
