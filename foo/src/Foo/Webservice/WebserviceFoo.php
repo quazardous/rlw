@@ -42,7 +42,7 @@ class WebserviceFoo extends WebserviceAbstract {
   	'shared2' => 'string',
   );
   
-  public function prepareCustomStructTypeDataType3(&$value) {
+  public function prepareCustomTypeDataType3(&$value) {
   	if (!is_array($value)) {
   		$value = array('foo' => $value);
   	}

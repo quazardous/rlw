@@ -30,8 +30,8 @@ abstract class WebserviceAbstract {
   
   public function getTypeDefinition($type) {
   	if (isset($this->_typeDefinitions[$type])) {
-  		if (isset($this->_typeDefinitions[$type]['type']) && $this->_typeDefinitions[$type]['type'] == 'struct' && !isset($this->_typeDefinitions[$type]['prepare_callback'])) {
-  			$this->_typeDefinitions[$type]['prepare_callback'] = 'prepareCustomStructTypeData'.ucfirst($type);
+  		if (isset($this->_typeDefinitions[$type]['type']) && !isset($this->_typeDefinitions[$type]['prepare_callback'])) {
+  			$this->_typeDefinitions[$type]['prepare_callback'] = 'prepareCustomTypeData'.ucfirst($type);
   		}
   		return $this->_typeDefinitions[$type];
   	}
