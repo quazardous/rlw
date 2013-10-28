@@ -147,9 +147,9 @@ abstract class WebserviceAbstract {
     // initialize request handlers and give the possibility to the handlers to alter the request 
     $this->alterRequests($allRequests);
     $list = $allRequests;
-    foreach ($list as $request) {
+    foreach ($list as $tag => $request) {
       $handler = $this->initRequestHandler($request['#tag'], $request['#name']);
-      $handler->setRequest($request);
+      $handler->setRequest($allRequests[$tag]);
       $handler->alterRequests($allRequests);
     }
     unset($request);
