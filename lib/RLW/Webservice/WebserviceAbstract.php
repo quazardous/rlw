@@ -47,29 +47,33 @@ abstract class WebserviceAbstract {
   
   /**
    * Allow handlers to alter/prepare the parameter value.
-   * @param unknown $data
-   * @param unknown $definition
-   * @param unknown $path
+   * @param mixed $data
+   * @param array $definition
+   * @param string $path
+   * @param mixed $parent object
+   * @param RequestHandlerAbstract $request
    */
-  public function prepareRequestParameterValue(&$data, $definition, $path, RequestHandlerAbstract $request) {
+  public function prepareRequestParameterValue(&$data, $definition, $path, $parent, RequestHandlerAbstract $request) {
   	if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
   		$f = $definition['prepare_callback'];
-  		$this->$f($data, $definition, $path, $request);
+  		$this->$f($data, $definition, $path, $parent, $request);
   	}
   }
   
   /**
    * Allow handlers to valid the parameter value.
-   * @param unknown $data
-   * @param unknown $definition
-   * @param unknown $path
+   * @param mixed $data
+   * @param array $definition
+   * @param string $path
+   * @param mixed $parent object
+   * @param RequestHandlerAbstract $request
    *
    * @return boolean
    */
-  public function validRequestParameterValue($data, $definition, $path, RequestHandlerAbstract $request) {
+  public function validRequestParameterValue($data, $definition, $path, $parent, RequestHandlerAbstract $request) {
   	if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
   		$f = $definition['valid_callback'];
-  		return $this->$f($data, $definition, $path, $request);
+  		return $this->$f($data, $definition, $path, $parent, $request);
   	}
   	return true;
   }  

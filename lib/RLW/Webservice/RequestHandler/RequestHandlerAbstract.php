@@ -53,11 +53,13 @@ abstract class RequestHandlerAbstract {
    * Validate a request param value.
    * @param string $path
    * @param mixed $value
+   * @param string $path
+   * @param mixed $parent object
    * @throws WebserviceException
    * @return boolean
    */
-  protected function validRequestParameter(&$value, $definition , $path) {
-  	$this->prepareRequestParameterValue($value, $definition, $path);
+  protected function validRequestParameter(&$value, $definition, $path, $parent) {
+  	$this->prepareRequestParameterValue($value, $definition, $path, $parent);
   	$type = $definition['type'];
   	switch ($type) {
   		case 'string':
@@ -120,7 +122,7 @@ abstract class RequestHandlerAbstract {
   				return false;
   			}
   			foreach ($value as $i => &$v) {
-  				if (!$this->validRequestParameter($v, $definition['nested'], "{$path}[{$i}]")) {
+  				if (!$this->validRequestParameter($v, $definition['nested'], "{$path}[{$i}]", $value)) {
   					return false;
   				}
   			}
@@ -140,7 +142,7 @@ abstract class RequestHandlerAbstract {
   			if (empty($definition['struct']) || (!is_array($definition['struct']))) {
   				throw new WebserviceException("struct requires a struct definition", WebserviceException::no_struct);
   			}
-  			if(!$this->validRequestParameterStruct($value, $definition['struct'], $path)) {
+  			if(!$this->validRequestParameterStruct($value, $definition['struct'], $path, $value)) {
   				return false;
   			}
   			break;
@@ -151,7 +153,7 @@ abstract class RequestHandlerAbstract {
   		default:
   			throw new WebserviceException("{$type} : unknown type", WebserviceException::unknown_request_parameter_type);
   	}
-  	if (!$this->validRequestParameterValue($value, $definition, $path)) {
+  	if (!$this->validRequestParameterValue($value, $definition, $path, $parent)) {
   		if ($this->getStatusCode() == 200) {
   			// default status for invalid parameter
   			$this->setStatus(400, "{$path} : parameter is not valid");
@@ -166,9 +168,10 @@ abstract class RequestHandlerAbstract {
    * @param array $params
    * @param array $definitions
    * @param string $path
+   * @param mixed $parent object
    * @return boolean
    */
-  protected function validRequestParameterStruct(&$data, &$definitions, $path = '') {
+  protected function validRequestParameterStruct(&$data, &$definitions, $path, $parent) {
   	if (!(is_array($data) || is_object($data))) {
   		$this->setStatus(400, "{$path} : parameter is not a struct");
   		return false;
@@ -190,7 +193,7 @@ abstract class RequestHandlerAbstract {
   			return false;
   		}
   		if ($value !== null) {
-  			if (!$this->validRequestParameter($value, $definitions[$name], "{$path}{$name}")) {
+  			if (!$this->validRequestParameter($value, $definitions[$name], "{$path}{$name}", $data)) {
   				return false;
   			}
   		}
@@ -213,34 +216,36 @@ abstract class RequestHandlerAbstract {
   
   /**
    * Allow handlers to alter/prepare the parameter value.
-   * @param unknown $data
-   * @param unknown $definition
-   * @param unknown $path
+   * @param mixed $data
+   * @param array $definition
+   * @param string $path
+   * @param mixed $parent
    */
-	protected function prepareRequestParameterValue(&$data, $definition, $path) {
+	protected function prepareRequestParameterValue(&$data, $definition, $path, $parent) {
 		if (isset($definition['prepare_callback']) && method_exists($this, $definition['prepare_callback'])) {
 			$f = $definition['prepare_callback'];
-			$this->$f($data, $definition, $path, $this);
+			$this->$f($data, $definition, $path, $parent, $this);
 		}
 		else {
-			$this->getWS()->prepareRequestParameterValue($data, $definition, $path, $this);
+			$this->getWS()->prepareRequestParameterValue($data, $definition, $path, $parent, $this);
 		}
 	}
 	
 	/**
 	 * Allow handlers to valid the parameter value.
-	 * @param unknown $data
-	 * @param unknown $definition
-	 * @param unknown $path
+	 * @param mixed $data
+	 * @param array $definition
+	 * @param string $path
+	 * @param mixed $parent
    * 
    * @return boolean
    */
-	protected function validRequestParameterValue($data, $definition, $path) {
+	protected function validRequestParameterValue($data, $definition, $path, $parent) {
 		if (isset($definition['valid_callback']) && method_exists($this, $definition['valid_callback'])) {
 			$f = $definition['valid_callback'];
-			return $this->$f($data, $definition, $path, $this);
+			return $this->$f($data, $definition, $path, $parent, $this);
 		}
-		return $this->getWS()->validRequestParameterValue($data, $definition, $path, $this);
+		return $this->getWS()->validRequestParameterValue($data, $definition, $path, $parent, $this);
 	}
   
   protected $_request;
@@ -363,7 +368,7 @@ abstract class RequestHandlerAbstract {
    */
   public function areParametersValid() {
   	if ($this->_validRequest) {
-  		return $this->validRequestParameterStruct($this->_request['#request'], $this->_requestParameterDefinitions);
+  		return $this->validRequestParameterStruct($this->_request['#request'], $this->_requestParameterDefinitions, '', $this);
   	}
   	return true;
   }
