@@ -12,6 +12,7 @@ class Types extends BaseAbstract {
 			'positiveNumeric' => array('type' => 'numeric', 'min' => 0),
 			'defaultString' => array('type' => 'string', 'default' => 'xyz'),
 			'freeTag' => array('type' => 'tag', 'tags' => array('one', 'two', 'three')),
+			'upperFreeTag' => array('type' => 'tag', 'tags' => array('one', 'two', 'three'), 'transform' => 'upper'),
 			'freeBoolean' => array('type' => 'boolean'),
 			'freeMixed' => array('type' => 'mixed', 'valid_callback' => 'validFreeMixed'),
 			'null' => 'null', // null parameter

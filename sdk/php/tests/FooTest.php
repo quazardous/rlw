@@ -578,6 +578,36 @@ class FooTest extends PHPUnit_Framework_TestCase {
   /**
    * @depends testNewRLW
    */
+  public function testApiFooWebserviceTypesTagCaseInsensitiveOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeTag = 'Two';
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals('Two', $res->types->{'#data'}->{'#request'}->freeTag);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesTagUpperOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->upperFreeTag = 'Two';
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals('TWO', $res->types->{'#data'}->{'#request'}->upperFreeTag);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
   public function testApiFooWebserviceTypesBooleanKO(RLW $ws)
   {
   	$request = $ws->createRequest('foo');
