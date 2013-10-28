@@ -193,7 +193,7 @@ abstract class RequestHandlerAbstract {
   			return false;
   		}
   		if ($value !== null) {
-  			if (!$this->validRequestParameter($value, $definitions[$name], "{$path}{$name}", $data)) {
+  			if (!$this->validRequestParameter($value, $definitions[$name], "{$path}{$name}", (object)$data)) {
   				return false;
   			}
   		}
