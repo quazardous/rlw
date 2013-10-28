@@ -149,13 +149,14 @@ abstract class WebserviceAbstract {
     $list = $allRequests;
     foreach ($list as $request) {
       $handler = $this->initRequestHandler($request['#tag'], $request['#name']);
+      $handler->setRequest($request);
       $handler->alterRequests($allRequests);
     }
     unset($request);
 
     // prepare topological sort 
     $nodeids = $edges = array();
-    foreach ($allRequests as $tag => &$request) {
+    foreach ($allRequests as $tag => $request) {
       $nodeids[$tag] = $tag;
       foreach ($request['#requires'] as $reqtag) {
         $edges[] = array($reqtag, $tag);
