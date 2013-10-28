@@ -142,7 +142,7 @@ abstract class RequestHandlerAbstract {
   			if (empty($definition['struct']) || (!is_array($definition['struct']))) {
   				throw new WebserviceException("struct requires a struct definition", WebserviceException::no_struct);
   			}
-  			if(!$this->validRequestParameterStruct($value, $definition['struct'], $path, $value)) {
+  			if(!$this->validRequestParameterStruct($value, $definition['struct'], $path, (object)$value)) {
   				return false;
   			}
   			break;
