@@ -438,9 +438,11 @@ abstract class RequestHandlerAbstract {
     // nothing
   }
   
-  public function __get($name) {
-    if (isset($this->_request['#request'][$name])) return $this->_request['#request'][$name];
-    return null;
+  public function &__get($name) {
+    if (!isset($this->_request['#request'][$name])) {
+    	$this->_request['#request'][$name] = null;
+    }
+    return $this->_request['#request'][$name];
   }
   
   public function __set($name, $value) {

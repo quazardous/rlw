@@ -40,6 +40,7 @@ class WebserviceFoo extends WebserviceAbstract {
   protected $_sharedRequestParameterDefinitions = array(
   	'shared1' => 'string',
   	'shared2' => 'string',
+  	'blockme' => 'boolean',
   );
   
   protected function prepareCustomTypeDataType3(&$value) {
@@ -49,7 +50,7 @@ class WebserviceFoo extends WebserviceAbstract {
   }
   
   public function canAccess() {
-    if ($this->getRequestHandler('#main')->blockme) return false;
+    if (isset($this->getRequestHandler('#main')->blockme) && $this->getRequestHandler('#main')->blockme) return false;
     return true;
   }
 }

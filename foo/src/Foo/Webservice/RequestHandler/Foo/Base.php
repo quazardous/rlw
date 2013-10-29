@@ -21,7 +21,7 @@ class Base extends BaseAbstract {
   }
   
   public function canAccess() {
-    if ($this->blockme) return false;
+    if (isset($this->blockme) && $this->blockme) return false;
     return true;
   }
 }
