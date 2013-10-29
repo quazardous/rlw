@@ -48,6 +48,44 @@ Mainly you will do your stuff an set status and data to return.
  * isValid(): you can tell RLW if request is correct
  * alterRequests(): you can alter all (sub)requests...
 
+Data Validation
+---------------
+
+You can describe the input data and RLW takes care of the data validation.
+
+    protected $_requestParameterDefinitions = array(
+      'freeStringsArray' => array(
+         'type' => 'array',
+         'nested' => 'string',),
+      'sizeStringsArray' => array(
+          'type' => 'array',
+          'min' => 3,
+          'max' => 10,
+          'nested' => 'string',),
+      );
+
+Type definition
+---------------
+
+You can define a custom user type.
+
+    protected $_typeDefinitions = array(
+      'my_struct' => array(
+        'type' => 'struct',
+        'struct' => array(
+          'foo' => array('type' => 'string'),
+          ),
+      ),
+    );
+
+And use it.
+
+     protected $_requestParameterDefinitions = array(
+      'field' => array(
+         'type' => '<my_struct>',
+         'mandatory' => true,),
+     );
+
 PHP SDK
 =======
 RLW comes with a basic PHP SDK.

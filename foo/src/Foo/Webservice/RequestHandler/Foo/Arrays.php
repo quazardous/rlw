@@ -12,6 +12,11 @@ class Arrays extends BaseAbstract {
 					'min' => 3,
 					'max' => 10,
 					'nested' => 'string',),
+			'looseStringsArray' => array(
+					'type' => 'array',
+					'nested' => 'string',
+					'cast' => true,
+			),
 	);
 	
   public function execute() {

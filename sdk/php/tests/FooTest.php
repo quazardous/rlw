@@ -884,6 +884,20 @@ class FooTest extends PHPUnit_Framework_TestCase {
   /**
    * @depends testNewRLW
    */
+  public function testApiFooWebserviceArraysLooseOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$arrays = $request->subRequest('arrays');
+  	$arrays->looseStringsArray = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->arrays->{'#status'}->code);
+  	$this->assertEquals(array("xyz"), $res->arrays->{'#data'}->{'#request'}->looseStringsArray);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
   public function testApiFooWebserviceArraysOK(RLW $ws)
   {
   	$request = $ws->createRequest('foo');

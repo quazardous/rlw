@@ -38,6 +38,7 @@ abstract class RequestHandlerAbstract {
    *      'valid_callback' => 'method_name', // a valid callback
    *      'case_sensitive' => true|false, // for tags, default false
    *      'transform' => 'lower'|'upper', // basic functions
+   *      'cast' => true|false, // try basic cast for string and numeric, for array put the value in an array, default is false
    *   ),
    *   'param2' => 'type', 
    *   ...
@@ -84,6 +85,11 @@ abstract class RequestHandlerAbstract {
   	$type = $definition['type'];
   	switch ($type) {
   		case 'string':
+  			if (!empty($definition['cast'])) {
+  				if (in_array(gettype($value), array('boolean', 'integer', 'double', 'NULL'))) {
+  					$value = (string) $value;
+  				}
+  			}
   			if (!is_string($value)) {
   				$this->setStatus(400, "{$path} : not a string");
   				return false;
@@ -104,6 +110,16 @@ abstract class RequestHandlerAbstract {
   			break;
 
   		case 'numeric':
+  			if (!empty($definition['cast'])) {
+  				if (in_array(gettype($value), array('boolean', 'string', 'NULL'))) {
+  					if (is_string($value)) {
+  						$value = doubleval($value);
+  					}
+  					else {
+  						$value = (string) $value;
+  					}
+  				}
+  			}
   			if (!is_numeric($value)) {
   				$this->setStatus(400, "{$path} : not a numeric");
   				return false;
@@ -119,7 +135,7 @@ abstract class RequestHandlerAbstract {
   			break;
   			
   		case 'boolean':
-  			if ($value === true) $value = 1;
+   			if ($value === true) $value = 1;
   			elseif ($value === false) $value = 0;
   			if (!in_array($value, array(0, 1), true)) {
   				$this->setStatus(400, "{$path} : not a boolean");
@@ -128,6 +144,11 @@ abstract class RequestHandlerAbstract {
   			break;
   			
   		case 'array':
+  			if (!empty($definition['cast'])) {
+  				if (!is_array($value)) {
+  					$value = array($value);
+  				}
+  			}
   			if (empty($definition['nested'])) {
   				throw new WebserviceException("array requires a nested type", WebserviceException::no_nested_type);
   			}
