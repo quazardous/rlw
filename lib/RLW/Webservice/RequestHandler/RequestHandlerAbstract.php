@@ -329,10 +329,13 @@ abstract class RequestHandlerAbstract {
   	
   	if (preg_match('/^\<(.+)\>$/', $definition['type'], $matches)) {
   		// get custom types
-  		$definition = $this->getWS()->getTypeDefinition($matches[1]);
-  		if (!$definition) {
+  		$typedef = $this->getWS()->getTypeDefinition($matches[1]);
+  		if (!$typedef) {
   			throw new WebserviceException("{$matches[1]} : unknown custom type", WebserviceException::unknown_request_parameter_custom_type);
   		}
+  		unset($definition['type']);
+  		$definition = array_merge($typedef, $definition);
+  		unset($typedef);
   	}
   	
   	$definition += array(
