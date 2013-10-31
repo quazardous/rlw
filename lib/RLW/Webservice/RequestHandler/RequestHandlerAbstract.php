@@ -370,7 +370,7 @@ abstract class RequestHandlerAbstract {
     //nothing
   }
   
-  protected function setStatus($code, $message, $details = null) {
+  public function setStatus($code, $message, $details = null) {
     $this->_statusCode = $code;
     $this->_statusMessage = $message;
     $this->_statusDetails = $details;
