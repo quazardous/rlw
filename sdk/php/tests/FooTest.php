@@ -429,6 +429,21 @@ class FooTest extends PHPUnit_Framework_TestCase {
   /**
    * @depends testNewRLW
    */
+  public function testApiFooWebserviceTypesStringTruncateOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->truncateString = "xyz0123456789";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  	$this->assertEquals("xyz0123456", $res->types->{'#data'}->{'#request'}->truncateString);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
   public function testApiFooWebserviceTypesFreeString(RLW $ws)
   {
   	$request = $ws->createRequest('foo');

@@ -7,6 +7,7 @@ class Types extends BaseAbstract {
 			'freeString' => array('type' => 'string'),
 			'mandatoryString' => array('type' => 'string', 'mandatory' => true),
 			'sizeString' => array('type' => 'string', 'min' => 5, 'max' => 10),
+			'truncateString' => array('type' => 'string', 'min' => 5, 'max' => 10, 'transform' => array('truncate')),
 			'patternString' => array('type' => 'string', 'pattern' => '/^xyz/'),
 			'freeNumeric' => array('type' => 'numeric'),
 			'positiveNumeric' => array('type' => 'numeric', 'min' => 0),

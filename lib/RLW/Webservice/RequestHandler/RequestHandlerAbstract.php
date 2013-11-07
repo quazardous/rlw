@@ -37,7 +37,7 @@ abstract class RequestHandlerAbstract {
    *      'prepare_callback' => 'method_name', // a prepare callback
    *      'valid_callback' => 'method_name', // a valid callback
    *      'case_sensitive' => true|false, // for tags, default false
-   *      'transform' => 'lower'|'upper', // basic functions
+   *      'transform' => 'lower'|'upper'|'truncate'|'trim', // basic functions
    *      'cast' => true|false, // try basic cast for string and numeric, for array put the value in an array, default is false
    *   ),
    *   'param2' => 'type', 
@@ -57,14 +57,25 @@ abstract class RequestHandlerAbstract {
   	switch ($type) {
   		case 'string': case 'tag':
   			if (isset($definition['transform'])) {
-  				switch ($definition['transform']) {
-  					case 'lower':
-  						$value = strtolower($value);
-  						break;
-  					case 'upper':
-  						$value = strtoupper($value);
-  						break;
+  				foreach((array)$definition['transform'] as $transform) {
+	  				switch ($transform) {
+	  					case 'lower':
+	  						$value = strtolower($value);
+	  						break;
+	  					case 'upper':
+	  						$value = strtoupper($value);
+	  						break;
+	  					case 'truncate':
+	  						if (isset($definition['max'])) {
+	  							$value = substr($value, 0, $definition['max']);
+	  						}
+	  						break;
+  						case 'trim':
+  							$value = strtoupper($value);
+  							break;
+	  				}
   				}
+  				
   			}
   			break;
   	}
@@ -90,6 +101,7 @@ abstract class RequestHandlerAbstract {
   					$value = (string) $value;
   				}
   			}
+  			$this->transformRequestParameterValue($value, $definition, $path);
   			if (!is_string($value)) {
   				$this->setStatus(400, "{$path} : not a string");
   				return false;
@@ -106,7 +118,6 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : must match pattern {$definition['pattern']}");
   				return false;
   			}
-  			$this->transformRequestParameterValue($value, $definition, $path);
   			break;
 
   		case 'numeric':
@@ -176,6 +187,7 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : not a tag");
   				return false;
   			}
+  			$this->transformRequestParameterValue($value, $definition, $path);
   			if (empty($definition['tags']) || (!is_array($definition['tags']))) {
   				throw new WebserviceException("tag requires a list of tags", WebserviceException::no_tags);
   			}
@@ -187,7 +199,6 @@ abstract class RequestHandlerAbstract {
   				$this->setStatus(400, "{$path} : ".((string)$value)." not in the list");
   				return false;
   			}
-  			$this->transformRequestParameterValue($value, $definition, $path);
   			break;
   			
   		case 'struct':
