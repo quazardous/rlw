@@ -71,7 +71,7 @@ abstract class RequestHandlerAbstract {
 	  						}
 	  						break;
   						case 'trim':
-  							$value = strtoupper($value);
+  							$value = trim($value);
   							break;
 	  				}
   				}
