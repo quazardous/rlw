@@ -365,15 +365,4 @@ abstract class WebserviceAbstract {
     // nothing
   }
   
-  public function catchErrors($errors) { 
-    if (count($errors)) {
-      $list = array();
-      foreach ($errors as $error) {
-        $list[] = $error->getMessage();
-      }
-      $list = array_unique($list);
-      return $list;
-    }
-    
-  }
 }
