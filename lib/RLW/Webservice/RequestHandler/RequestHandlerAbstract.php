@@ -22,7 +22,7 @@ abstract class RequestHandlerAbstract {
    * Description of the request params.
    * @var array(
    *   'param1' => array(
-   *      'type' => numeric|string|boolean|array|struct|tag|<type>|null|mixed,
+   *      'type' => numeric|string|boolean|array|struct|tag|date|datetime|<type>|null|mixed,
    *      // default is string,
    *      // you can use null to disable a shared parameter
    *      // mixed means what you wants
@@ -38,7 +38,7 @@ abstract class RequestHandlerAbstract {
    *      'valid_callback' => 'method_name', // a valid callback
    *      'case_sensitive' => true|false, // for tags, default false
    *      'transform' => 'lower'|'upper'|'truncate'|'trim', // basic functions
-   *      'cast' => true|false, // try basic cast for string and numeric, for array put the value in an array, default is false
+   *      'cast' => true|false, // try basic cast for string and numeric, allow cast between date and datetime, for array put the value in an array, default is false
    *   ),
    *   'param2' => 'type', 
    *   ...
@@ -151,6 +151,26 @@ abstract class RequestHandlerAbstract {
   			if (!in_array($value, array(0, 1), true)) {
   				$this->setStatus(400, "{$path} : not a boolean");
   				return false;
+  			}
+  			break;
+  			
+  		case 'date': case 'datetime':
+  			if (!is_string($value)) {
+  				$this->setStatus(400, "{$path} : not a {$type}");
+  				return false;
+  			}
+  			$value = trim($value);
+  			if (!empty($definition['cast'])) $pattern = '/^\d{4}-\d{2}-\d{2}/';
+  			elseif ($type == 'datetime') $pattern = '/^\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}/';
+  			else $pattern = '/^\d{4}-\d{2}-\d{2}$/';
+  			if (!preg_match($pattern, $value)) {
+  				$this->setStatus(400, "{$path} : not a {$type}");
+  				return false;
+  			}
+  			try {
+  				$value = new \DateTime($value);
+  			} catch(\Exception $e) {
+  				$this->setStatus(400, "{$path} : not a {$type}");
   			}
   			break;
   			

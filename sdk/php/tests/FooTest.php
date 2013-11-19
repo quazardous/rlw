@@ -756,6 +756,122 @@ class FooTest extends PHPUnit_Framework_TestCase {
   
   /**
    * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDateKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->freeDate = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeDate : not a date', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDateOK2(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeDate = "2013-02-31T23:59:59Z";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeDate : not a date', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDateOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeDate = "2013-02-31";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDatetimeKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeDatetime = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeDatetime : not a datetime', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDatetimeKO2(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeDatetime = "2013-02-31";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('freeDatetime : not a datetime', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDatetimeOK1(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->freeDatetime = "2013-02-31T23:59:59Z";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDateCastKO(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->flexDatetime = "xyz";
+  	$res = $request->execute();
+  	$this->assertEquals(400, $res->types->{'#status'}->code);
+  	$this->assertEquals('flexDatetime : not a datetime', $res->types->{'#status'}->message);
+  }
+  
+  /**
+   * @depends testNewRLW
+   */
+  public function testApiFooWebserviceTypesDateCastOK(RLW $ws)
+  {
+  	$request = $ws->createRequest('foo');
+  	$this->assertTrue($request instanceof RLWRequest);
+  	$types = $request->subRequest('types');
+  	$types->mandatoryString = "xyz";
+  	$types->flexDatetime = "2013-02-31";
+  	$res = $request->execute();
+  	$this->assertEquals(200, $res->types->{'#status'}->code);
+  }
+  
+  /**
+   * @depends testNewRLW
    * @expectedException RLWException
    * @expectedExceptionCode 1001
    * @expectedExceptionMessage API RLW\Webservice\WebserviceException : struct requires a struct definition (11)

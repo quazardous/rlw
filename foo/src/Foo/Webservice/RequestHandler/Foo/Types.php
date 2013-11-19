@@ -16,6 +16,9 @@ class Types extends BaseAbstract {
 			'upperFreeTag' => array('type' => 'tag', 'tags' => array('one', 'two', 'three'), 'transform' => 'upper'),
 			'freeBoolean' => array('type' => 'boolean'),
 			'freeMixed' => array('type' => 'mixed', 'valid_callback' => 'validFreeMixed'),
+			'freeDate' => array('type' => 'date'),
+			'freeDatetime' => array('type' => 'datetime'),
+			'flexDatetime' => array('type' => 'datetime', 'cast' => true),
 			'null' => 'null', // null parameter
 	);
 	
