@@ -307,6 +307,8 @@ abstract class WebserviceAbstract {
         }
       }
       
+      $this->complete();
+      
       $main = (array)$subRequestResponses['#main'];
       unset($subRequestResponses['#main']);
       $main += $subRequestResponses;
@@ -355,6 +357,13 @@ abstract class WebserviceAbstract {
    */
   public function init() {
 
+  }
+  
+  /**
+   * Override with complete stuff
+   */
+  public function complete() {
+  
   }
   
   /**
