@@ -247,6 +247,20 @@ abstract class RequestHandlerAbstract {
   }
   
   /**
+   * Set default values.
+   * @param array $data
+   * @param array $definitions
+   */
+  protected function setDefaultValuesRequestParameterStruct(&$data, $definitions) {
+      $data = (array)$data;
+      foreach ($definitions as $name => $definition) {
+    	if (array_key_exists('default', $definition) && !array_key_exists($name, $data)) {
+    	    $data[$name] = $definition['default'];
+    	}
+      }
+  }
+  
+  /**
    * Valid the request/struct params
    * @param array $params
    * @param array $definitions
@@ -261,14 +275,6 @@ abstract class RequestHandlerAbstract {
   	}
   	
   	if ($path) $path .= '.';
-  	
-  	$data = (array)$data;
-  	
-  	foreach ($definitions as $name => $definition) {
-  		if (array_key_exists('default', $definition) && !array_key_exists($name, $data)) {
-  			$data[$name] = $definition['default'];
-  		}
-  	}
   	
   	foreach ($data as $name => &$value) {
   		if ((!isset($definitions[$name]))||($definitions[$name]['type'] == 'null')) {
@@ -334,7 +340,8 @@ abstract class RequestHandlerAbstract {
   protected $_request;
   
   public function setRequest($request) {
-    $this->_request = $request;
+     $this->_request = $request;
+     $this->setDefaultValuesRequestParameterStruct($this->_request['#request'], $this->_requestParameterDefinitions);
   }
   
   public function getRequest() {
@@ -380,9 +387,9 @@ abstract class RequestHandlerAbstract {
   		$this->initParameterDefinitions($definition['struct']);
   	}
   	if ($definition['type']=='tag' && empty($definition['case_sensitive']) && isset($definition['tags'])) {
-  			foreach($definition['tags'] as &$tag) {
-  				$tag = strtolower($tag);
-  			}
+    	foreach($definition['tags'] as &$tag) {
+    		$tag = strtolower($tag);
+    	}
   	}
   }
   
