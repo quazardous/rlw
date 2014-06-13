@@ -171,6 +171,7 @@ abstract class RequestHandlerAbstract {
   				$value = new \DateTime($value);
   			} catch(\Exception $e) {
   				$this->setStatus(400, "{$path} : not a {$type}");
+  				return false;
   			}
   			break;
   			
@@ -247,21 +248,7 @@ abstract class RequestHandlerAbstract {
   }
   
   /**
-   * Set default values.
-   * @param array $data
-   * @param array $definitions
-   */
-  protected function setDefaultValuesRequestParameterStruct(&$data, $definitions) {
-      $data = (array)$data;
-      foreach ($definitions as $name => $definition) {
-    	if (array_key_exists('default', $definition) && !array_key_exists($name, $data)) {
-    	    $data[$name] = $definition['default'];
-    	}
-      }
-  }
-  
-  /**
-   * Valid the request/struct params
+   * Valid and normalize the request/struct params
    * @param array $params
    * @param array $definitions
    * @param string $path
@@ -272,6 +259,14 @@ abstract class RequestHandlerAbstract {
   	if (!(is_array($data) || is_object($data))) {
   		$this->setStatus(400, "{$path} : parameter is not a struct");
   		return false;
+  	}
+  	
+  	$data = (array)$data;
+
+  	foreach ($definitions as $name => $definition) {
+  	    if (array_key_exists('default', $definition) && !array_key_exists($name, $data)) {
+  	        $data[$name] = $definition['default'];
+  	    }
   	}
   	
   	if ($path) $path .= '.';
@@ -288,12 +283,12 @@ abstract class RequestHandlerAbstract {
   		}
   	}
   	
-  	foreach ($definitions as $name => $definition) {
-  		if ($definition['mandatory'] && ((!isset($data[$name])) || $data[$name] === null || $data[$name] === '')) {
-  			$this->setStatus(400, "{$path}{$name} : parameter is mandatory");
-  			return false;
-  		}
-  	}
+      	foreach ($definitions as $name => $definition) {
+      		if ($definition['mandatory'] && ((!isset($data[$name])) || $data[$name] === null || $data[$name] === '')) {
+      			$this->setStatus(400, "{$path}{$name} : parameter is mandatory");
+      			return false;
+      		}
+      	}
   	
   	if ($path) {
   		// for sub structs turn into object
@@ -341,7 +336,7 @@ abstract class RequestHandlerAbstract {
   
   public function setRequest($request) {
      $this->_request = $request;
-     $this->setDefaultValuesRequestParameterStruct($this->_request['#request'], $this->_requestParameterDefinitions);
+     $this->validRequestParameterStruct($this->_request['#request'], $this->_requestParameterDefinitions, '', $this);
   }
   
   public function getRequest() {
