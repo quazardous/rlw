@@ -44,7 +44,7 @@ class WebserviceFoo extends WebserviceAbstract {
   );
   
   protected function prepareCustomTypeDataType3(&$value) {
-  	if (!is_array($value)) {
+  	if (!(is_array($value)||is_object($value))) {
   		$value = array('foo' => $value);
   	}
   }

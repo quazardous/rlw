@@ -23,6 +23,16 @@ class RLWRequestBase {
     if (!isset($this->_request[$name])) $this->_request[$name] = null;
     return $this->_request[$name];
   }
+  
+  public function __isset($name) {
+      return array_key_exists($name, $this->_request);
+  }
+  
+  public function __unset($name) {
+      if (array_key_exists($name, $this->_request)) {
+          unset($this->_request[$name]);
+      }
+  }
 
   public function getRequest() {
     return (array)$this->_request;

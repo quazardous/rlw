@@ -253,6 +253,7 @@ class FooTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($request instanceof RLWRequest);
     $res = $request->execute();
     $this->assertEquals('bar', $res->{'#data'}->{'#request'}->foo);
+    unset($ws->foo);
   }
   
   /**

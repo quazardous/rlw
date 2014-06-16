@@ -155,24 +155,26 @@ abstract class RequestHandlerAbstract {
   			break;
   			
   		case 'date': case 'datetime':
-  			if (!is_string($value)) {
-  				$this->setStatus(400, "{$path} : not a {$type}");
-  				return false;
-  			}
-  			$value = trim($value);
-  			if (!empty($definition['cast'])) $pattern = '/^\d{4}-\d{2}-\d{2}/';
-  			elseif ($type == 'datetime') $pattern = '/^\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}/';
-  			else $pattern = '/^\d{4}-\d{2}-\d{2}$/';
-  			if (!preg_match($pattern, $value)) {
-  				$this->setStatus(400, "{$path} : not a {$type}");
-  				return false;
-  			}
-  			try {
-  				$value = new \DateTime($value);
-  			} catch(\Exception $e) {
-  				$this->setStatus(400, "{$path} : not a {$type}");
-  				return false;
-  			}
+  		    if (!($value instanceof \DateTime)) {
+      			if (!is_string($value)) {
+      				$this->setStatus(400, "{$path} : not a {$type}");
+      				return false;
+      			}
+      			$value = trim($value);
+      			if (!empty($definition['cast'])) $pattern = '/^\d{4}-\d{2}-\d{2}/';
+      			elseif ($type == 'datetime') $pattern = '/^\d{4}-\d{2}-\d{2}T\d{2}\:\d{2}\:\d{2}/';
+      			else $pattern = '/^\d{4}-\d{2}-\d{2}$/';
+      			if (!preg_match($pattern, $value)) {
+      				$this->setStatus(400, "{$path} : not a {$type}");
+      				return false;
+      			}
+      			try {
+      				$value = new \DateTime($value);
+      			} catch(\Exception $e) {
+      				$this->setStatus(400, "{$path} : not a {$type}");
+      				return false;
+      			}
+  		    }
   			break;
   			
   		case 'array':
