@@ -109,7 +109,6 @@ abstract class WebserviceAbstract {
    * @return array ordered (sub) requests (from #requires)
    */
   protected function preprareRequests(array $allRequests) {
-    
     $main = array(
         '#request' => $allRequests['#request'],
         );
