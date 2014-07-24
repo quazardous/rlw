@@ -67,7 +67,7 @@ abstract class RequestHandlerAbstract {
 	  						break;
 	  					case 'truncate':
 	  						if (isset($definition['max'])) {
-	  							$value = substr($value, 0, $definition['max']);
+	  							$value = (string)substr($value, 0, $definition['max']);
 	  						}
 	  						break;
   						case 'trim':
