@@ -2,7 +2,7 @@
   "name": "quazardous/rlw",
   "version": "1.0.0",
   "require": {
-		"pimple/pimple": "*",
+		"pimple/pimple": "~3.0",
     "symfony/http-foundation": "*"
   },
   "autoload": {
