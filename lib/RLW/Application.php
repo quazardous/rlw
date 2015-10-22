@@ -5,7 +5,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use RLW\Webservice\WebserviceAbstract;
 
-class Application extends \Pimple {
+class Application extends \Pimple\Container {
   protected function parseRequest(Request $request) {
     $get = array( '#request' => $request->query->all() );
     $post = json_decode($request->getContent(), true);
